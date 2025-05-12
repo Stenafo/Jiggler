@@ -6,6 +6,7 @@
 //  Copyright (c) 2003 Stick Software. All rights reserved.
 //
 
+#import "Scheduling/Scheduler.h"
 #import <Cocoa/Cocoa.h>
 
 
@@ -40,6 +41,9 @@
 	
 	// Prevent App Nap
 	id <NSObject> activityToken;
+	
+	// Scheduler
+	Scheduler *scheduler;
 }
 
 @property (retain) IBOutlet NSMenu *statusItemMenu;
@@ -61,4 +65,4 @@
 
 - (IBAction)jiggleMasterSwitchChanged:(id)sender;
 
-@end
+\@end
