@@ -8,6 +8,7 @@
 
 #import "PrefsController.h"
 #import "CocoaExtra.h"
+#import "SchedulingPrefsController.h"
 #import "AppDelegate.h"
 
 
@@ -32,6 +33,8 @@ static NSString *NotWhenScreenLockedDefaultsKey = @"NotWhenScreenLocked";
 static NSString *NotOnBatteryDefaultsKey = @"NotOnBattery";
 static NSString *NotWithFrontAppsNamedXDefaultsKey = @"NotWithFrontAppsNamedX";
 static NSString *FrontAppNameComponentDefaultsKey = @"FrontAppNameComponent";
+
+SchedulingPrefsController *schedulingPrefsController;
 
 
 @implementation PrefsController
