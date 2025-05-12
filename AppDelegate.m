@@ -12,6 +12,7 @@
 #import "SSVersionChecker.h"
 #import "PrefsController.h"
 #import "JigglerOverlayWindow.h"
+#import "Scheduling/Scheduler.h"
 #import "TimedQuitController.h"
 #import "SSCPU.h"
 
@@ -73,6 +74,12 @@ extern OSErr UpdateSystemActivity(UInt8 activity) __attribute__((weak_import));
 
 
 @implementation AppDelegate
+
+@synthesize scheduler;
+
+#pragma mark -
+#pragma mark SchedulerDelegate
+
 
 #pragma mark Launch and Termination
 
@@ -146,6 +153,11 @@ extern OSErr UpdateSystemActivity(UInt8 activity) __attribute__((weak_import));
 	// Prevent app nap; see https://lapcatsoftware.com/articles/prevent-app-nap.html
     activityToken = [[NSProcessInfo processInfo] beginActivityWithOptions:NSActivityUserInitiatedAllowingIdleSystemSleep reason:@"No napping on the job!"];
 	[activityToken retain];
+    
+    // Initialize the scheduler
+    self.scheduler = [[[Scheduler alloc] init] autorelease];
+    self.scheduler.delegate = self;
+ [self.scheduler loadIntervals];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification
@@ -158,6 +170,25 @@ extern OSErr UpdateSystemActivity(UInt8 activity) __attribute__((weak_import));
 	// Release our anti-App-Nap token
     [[NSProcessInfo processInfo] endActivity:activityToken];
 	[activityToken release];
+	activityToken = nil;
+}
+
+
+- (void)schedulerDidBecomeActive:(Scheduler *)scheduler {
+    NSLog(@"Scheduler became active. Starting jiggling.");
+    jiggleMasterSwitch = YES; // Or whatever mechanism controls the jiggling
+    [[NSUserDefaults standardUserDefaults] setBool:jiggleMasterSwitch forKey:JiggleMasterSwitchDefaultsKey];
+    [self fixMasterSwitchUI];
+    [self jiggleMouse:nil]; // Start the jiggling timer check immediately
+}
+
+- (void)schedulerDidBecomeInactive:(Scheduler *)scheduler {
+    NSLog(@"Scheduler became inactive. Stopping jiggling.");
+    jiggleMasterSwitch = NO; // Or whatever mechanism controls the jiggling
+    [[NSUserDefaults standardUserDefaults] setBool:jiggleMasterSwitch forKey:JiggleMasterSwitchDefaultsKey];
+    [self fixMasterSwitchUI];
+    [self cancelTimedQuit:nil]; // Cancel any timed quit if active
+    [self setJigglingActive:NO]; // Ensure jiggling is turned off
 	activityToken = nil;
 }
 
